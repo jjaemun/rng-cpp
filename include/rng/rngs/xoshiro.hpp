@@ -31,7 +31,6 @@ namespace rng::rngs {
                 return _ == u64{0};
             }
     
-                
             if (std::all_of(state, zeroed))
                 return std::nullopt;
 
