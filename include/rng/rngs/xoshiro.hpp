@@ -1,10 +1,12 @@
 #pragma once
 
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cassert>
 #include <optional>
+#include <ranges>
 #include <span>
 
 
@@ -16,23 +18,43 @@ namespace rng::rngs {
         
         std::array<u64, 4> state;
 
+    private:
         explicit Xoshiro256PlusPlus(const std::array<u64, 4>& state_) noexcept 
                 : state(state_) {}
 
     public:
         [[nodiscard]]
-        static auto seed_from_raw_bytes(std::span<std::byte> bytes) noexcept
+        static auto seed_from_raw_bytes(std::span<const std::byte> bytes) noexcept
             -> std::optional<Xoshiro256PlusPlus>
         {
             if (bytes.size() != 32) {
                 return std::nullopt;
             }
 
-            if (std::ranges::accumulate(bytes, 0u) == 0) {
+            auto zeroed = [](std::byte _) noexcept {
+
+                // Checks if a byte is zero valued. 
+                
+                return _ == 0;
+            };
+
+            if (std::all_of(bytes, zeroed) { 
                 return seed_from_u64(0u);
             }
 
-            // ...
+            std::array<u64> state{}; 
+            for (auto word : std::views::iota(0u, state.size())) {
+                for (auto byte : std::views::iota(0u, bytes.size())) {
+                    const auto offset = word * sizeof(u64) + byte;
+                    
+                    state[word] |= 
+                        static_cast<u64>(
+                            std::to_integer<u8>(bytes[offset])
+                        ) << (8u * byte);
+                }
+            }
+
+            return seed_from_state(state);
         }
 
 
@@ -84,12 +106,14 @@ namespace rng::rngs {
             while (dst.size() >= sizeof(u64)) {
                 const u64 word = next_u64();
 
-                for (auto i{0u}; i < sizeof(u64); ++i)
-                    dst[i] = static_cast<std::byte>(word >> (8 * i));
+                for (auto i : std::views::iota(0u, sizeof(u64))) {
+                    dst[i] = static_cast<std::byte>(word >> (8 * i)) ;
+                }
 
                 dst = dst.subspan(sizeof(u64));
             }
-
+        
+            // remainder.
             if (!dst.empty()) {
                 const u64 word = next_u64();
 
