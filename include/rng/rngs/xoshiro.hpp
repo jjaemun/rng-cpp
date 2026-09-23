@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <array>
 #include <bit>
-#include <cassert>
 #include <optional>
 #include <ranges>
 #include <span>
@@ -79,7 +78,6 @@ namespace rng::rngs {
                 word = copy ^ (copy >> 31);
             }
         
-            
             return Xoshiro256PlusPlus{words};
         }
 
