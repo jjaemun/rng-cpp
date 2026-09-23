@@ -28,16 +28,12 @@ namespace rng::rngs {
             -> std::optional<Xoshiro256PlusPlus>
         {
             const auto zeroed(u64 _) noexcept {
-
-                // Checks if a u64 is zero valued. 
-
                 return _ == u64{0};
             }
     
                 
-            if (std::all_of(state, zeroed)) {
+            if (std::all_of(state, zeroed))
                 return std::nullopt;
-            }
 
             return Xoshiro256PlusPlus{state};
         }
@@ -46,20 +42,16 @@ namespace rng::rngs {
         static auto seed_from_raw_bytes(std::span<const std::byte> bytes) noexcept
             -> std::optional<Xoshiro256PlusPlus>
         {
-            if (bytes.size() != 32) {
+            if (bytes.size() != 32)
                 return std::nullopt;
-            }
 
             const auto zeroed = [](std::byte _) noexcept {
-
-                // Checks if a byte is zero valued. 
-                
                 return _ == std::byte{0u};
             };
 
-            if (std::ranges::all_of(bytes, zeroed)) { 
+            if (std::ranges::all_of(bytes, zeroed))
                 return seed_from_u64(0u);
-            }
+            
 
             std::array<u64, 4> state{}; 
             for (auto word : std::views::iota(0u, state.size())) {
@@ -119,9 +111,9 @@ namespace rng::rngs {
             while (dst.size() >= sizeof(u64)) {
                 const u64 word = next_u64();
 
-                for (auto i : std::views::iota(0u, sizeof(u64))) {
-                    dst[i] = static_cast<std::byte>(word >> (8 * i)) ;
-                }
+                for (auto i : std::views::iota(0u, sizeof(u64)))
+                    dst[i] = static_cast<std::byte>(word >> (8 * i));
+                
 
                 dst = dst.subspan(sizeof(u64));
             }
@@ -129,9 +121,9 @@ namespace rng::rngs {
             if (!dst.empty()) {
                 const u64 word = next_u64();
 
-                for (auto : std::views::iota(0u, dst.size()) {
+                for (auto : std::views::iota(0u, dst.size())
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
-                }
+                
             }
         }
     };
