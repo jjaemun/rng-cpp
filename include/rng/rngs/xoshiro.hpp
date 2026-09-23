@@ -33,7 +33,7 @@ namespace rng::rngs {
         [[nodiscard]]
         u64 next_u64() noexcept {
             const auto ret = std::rotl(s[0] + s[3], 23) + s[0];
-            const auto t = self.s[1] << 17;
+            const auto t = s[1] << 17;
 
             s[2] ^= s[0];
             s[3] ^= s[1];
@@ -41,16 +41,16 @@ namespace rng::rngs {
             s[0] ^= s[3];
 
             s[2] ^= t;
-            s[3] = std::rotl(s[3], 45)
+            s[3] = std::rotl(s[3], 45);
 
-            return result;
+            return ret;
         }
 
         void fill_bytes(std::span<std::byte> dst) noexcept {
             while (dst.size() >= sizeof(u64)) {
-                const u64 word = next_64();
+                const u64 word = next_u64();
 
-                for (auto i{0uz}; i < sizeof(u64); ++i)
+                for (auto i{0u}; i < sizeof(u64); ++i)
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
 
                 dst = dst.subspan(sizeof(u64));
@@ -59,7 +59,7 @@ namespace rng::rngs {
             if (!dst.empty()) {
                 const u64 word = next_u64();
 
-                for (auto i{0uz}; i < dst.size()); ++i) {
+                for (auto i{0uz}; i < dst.size(); ++i) {
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
                 }
             }
