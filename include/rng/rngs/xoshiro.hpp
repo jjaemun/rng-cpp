@@ -3,6 +3,8 @@
 
 #include <array>
 #include <bit>
+#include <cassert>
+#include <optional>
 #include <span>
 
 
@@ -12,17 +14,49 @@
 namespace rng::rngs {
     class Xoshiro256PlusPlus final {
         
-        std::array<u64, 4> s;
+        std::array<u64, 4> state;
 
-        explicit Xoshiro256PlusPlus(u64 seed) noexcept {
-            for (auto& word : s)
-                word = seeds::splitmix64(seed);
-        }
+        explicit Xoshiro256PlusPlus(const std::array<u64, 4>& state_) noexcept 
+                : state(state_) {}
 
     public:
         [[nodiscard]]
+        static auto seed_from_raw_bytes(std::span<std::byte> bytes) noexcept
+            -> std::optional<Xoshiro256PlusPlus>
+        {
+            if (bytes.size() != 32) {
+                return std::nullopt;
+            }
+
+            if (std::ranges::accumulate(bytes, 0u) == 0) {
+                return seed_from_u64(0u);
+            }
+
+            // ...
+        }
+
+
+        [[nodiscard]]
+        static auto seed_from_state(const std::array<u64, 4>& state) noexcept
+            -> std::optional<Xoshiro256PlusPlus>
+        {
+            return Xoshiro256PlusPlus{state};
+        }
+
+        [[nodiscard]]
         static Xoshiro256PlusPlus seed_from_u64(u64 seed) noexcept {
-            Xoshiro256PlusPlus{s}; 
+            std::array<u64, 4u> words{};
+            for (auto& word : words) {
+                seed += 0x9e3779b97f4a7c15ULL;
+
+                auto copy = seed;
+                copy = (copy ^ (copy >> 30)) * 0xbf58476d1ce4e5b9ULL;
+                copy = (copy ^ (copy >> 27)) * 0x94d049bb133111ebULL;
+                word = copy ^ (copy >> 31);
+            }
+        
+            
+            return seed_from_state{words};
         }
 
         [[nodiscard]]
@@ -64,19 +98,5 @@ namespace rng::rngs {
                 }
             }
         }
-    };
-
-    private:
-        [[nodiscard]]
-        static constexpr u64 splitmix64(u64& state) noexcept
-        {
-            u64 value = (state += 0x9e3779b97f4a7c15ULL);
-    
-            value = (value ^ (value >> 30)) * 0xbf58476d1ce4e5b9ULL;
-            value = (value ^ (value >> 27)) * 0x94d049bb133111ebULL;
-
-            return value ^ (value >> 31);
-        }
-
     };
 } // namespace rng::rngs
