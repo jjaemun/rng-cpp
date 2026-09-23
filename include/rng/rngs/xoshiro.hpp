@@ -27,11 +27,11 @@ namespace rng::rngs {
         static auto seed_from_state(const std::array<u64, 4>& state) noexcept
             -> std::optional<Xoshiro256PlusPlus>
         {
-            const auto zeroed(u64 _) noexcept {
-                return _ == u64{0};
+            const auto zeroed = [](u64 word) noexcept {
+                return word == u64{0};
             }
     
-            if (std::all_of(state, zeroed))
+            if (std::ranges::all_of(state, zeroed))
                 return std::nullopt;
 
             return Xoshiro256PlusPlus{state};
@@ -44,8 +44,8 @@ namespace rng::rngs {
             if (bytes.size() != 32)
                 return std::nullopt;
 
-            const auto zeroed = [](std::byte _) noexcept {
-                return _ == std::byte{0u};
+            const auto zeroed = [](std::byte byte) noexcept {
+                return byte == std::byte{0u};
             };
 
             if (std::ranges::all_of(bytes, zeroed))
@@ -80,7 +80,7 @@ namespace rng::rngs {
             }
         
             
-            return seed_from_state(words);
+            return Xoshiro256PlusPlus{words};
         }
 
         [[nodiscard]]
