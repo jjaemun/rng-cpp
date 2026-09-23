@@ -24,6 +24,25 @@ namespace rng::rngs {
 
     public:
         [[nodiscard]]
+        static auto seed_from_state(const std::array<u64, 4>& state) noexcept
+            -> std::optional<Xoshiro256PlusPlus>
+        {
+            const auto zeroed(u64 _) noexcept {
+
+                // Checks if a u64 is zero valued. 
+
+                return _ == u64{0};
+            }
+    
+                
+            if (std::all_of(state, zeroed)) {
+                return std::nullopt;
+            }
+
+            return Xoshiro256PlusPlus{state};
+        }
+
+        [[nodiscard]]
         static auto seed_from_raw_bytes(std::span<const std::byte> bytes) noexcept
             -> std::optional<Xoshiro256PlusPlus>
         {
@@ -31,20 +50,20 @@ namespace rng::rngs {
                 return std::nullopt;
             }
 
-            auto zeroed = [](std::byte _) noexcept {
+            const auto zeroed = [](std::byte _) noexcept {
 
                 // Checks if a byte is zero valued. 
                 
-                return _ == 0;
+                return _ == std::byte{0u};
             };
 
-            if (std::all_of(bytes, zeroed) { 
+            if (std::ranges::all_of(bytes, zeroed)) { 
                 return seed_from_u64(0u);
             }
 
-            std::array<u64> state{}; 
+            std::array<u64, 4> state{}; 
             for (auto word : std::views::iota(0u, state.size())) {
-                for (auto byte : std::views::iota(0u, bytes.size())) {
+                for (auto byte : std::views::iota(0u, sizeof(u64))) {
                     const auto offset = word * sizeof(u64) + byte;
                     
                     state[word] |= 
@@ -55,14 +74,6 @@ namespace rng::rngs {
             }
 
             return seed_from_state(state);
-        }
-
-
-        [[nodiscard]]
-        static auto seed_from_state(const std::array<u64, 4>& state) noexcept
-            -> std::optional<Xoshiro256PlusPlus>
-        {
-            return Xoshiro256PlusPlus{state};
         }
 
         [[nodiscard]]
@@ -78,7 +89,7 @@ namespace rng::rngs {
             }
         
             
-            return seed_from_state{words};
+            return seed_from_state(words);
         }
 
         [[nodiscard]]
@@ -88,18 +99,20 @@ namespace rng::rngs {
 
         [[nodiscard]]
         u64 next_u64() noexcept {
-            const auto ret = std::rotl(s[0] + s[3], 23) + s[0];
-            const auto t = s[1] << 17;
+            const u64 result =
+            std::rotl(state[0] + state[3], 23) + state[0];
 
-            s[2] ^= s[0];
-            s[3] ^= s[1];
-            s[1] ^= s[2];
-            s[0] ^= s[3];
+            const u64 temporary = state[1] << 17;
 
-            s[2] ^= t;
-            s[3] = std::rotl(s[3], 45);
+            state[2] ^= state[0];
+            state[3] ^= state[1];
+            state[1] ^= state[2];
+            state[0] ^= state[3];
 
-            return ret;
+            state[2] ^= temporary;
+            state[3] = std::rotl(state[3], 45);
+
+            return result;
         }
 
         void fill_bytes(std::span<std::byte> dst) noexcept {
@@ -113,11 +126,10 @@ namespace rng::rngs {
                 dst = dst.subspan(sizeof(u64));
             }
         
-            // remainder.
             if (!dst.empty()) {
                 const u64 word = next_u64();
 
-                for (auto i{0uz}; i < dst.size(); ++i) {
+                for (auto : std::views::iota(0u, dst.size()) {
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
                 }
             }
