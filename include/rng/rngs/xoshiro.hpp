@@ -83,6 +83,23 @@ namespace rng::rngs {
             return Xoshiro256PlusPlus{words};
         }
 
+        using result_type = u64;
+
+        [[nodiscard]]
+        static constexpr auto min() noexcept {
+            return 0u;
+        }
+
+        [[nodiscard]]
+        static constexpr auto max() noexcept {
+            return num::MAX<u64>();
+        }
+
+        [[nodiscard]]
+        auto operator()() noexcept {
+            return next_u64();
+        }
+ 
         [[nodiscard]]
         u32 next_u32() noexcept {
             return static_cast<u32>(next_u64() >> 32);
@@ -125,5 +142,5 @@ namespace rng::rngs {
                 
             }
         }
-    };
+   };
 } // namespace rng::rngs
