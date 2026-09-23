@@ -86,17 +86,17 @@ namespace rng::rngs {
         using result_type = u64;
 
         [[nodiscard]]
-        static constexpr auto min() noexcept {
+        static constexpr u64 min() noexcept {
             return 0u;
         }
 
         [[nodiscard]]
-        static constexpr auto max() noexcept {
-            return num::MAX<u64>();
+        static constexpr u64 max() noexcept {
+            return std::numeric_limits<u64>::max();
         }
 
         [[nodiscard]]
-        auto operator()() noexcept {
+        u64 operator()() noexcept {
             return next_u64();
         }
  
@@ -129,7 +129,6 @@ namespace rng::rngs {
 
                 for (auto i : std::views::iota(0u, sizeof(u64)))
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
-                
 
                 dst = dst.subspan(sizeof(u64));
             }
@@ -137,7 +136,7 @@ namespace rng::rngs {
             if (!dst.empty()) {
                 const u64 word = next_u64();
 
-                for (auto : std::views::iota(0u, dst.size())
+                for (auto i : std::views::iota(0u, dst.size())
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
                 
             }
