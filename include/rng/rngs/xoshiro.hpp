@@ -25,48 +25,40 @@ namespace rng::rngs {
 
     public:
         [[nodiscard]]
-        static auto seed_from_state(const std::array<u64, 4>& state) noexcept
+        static auto seed_from_state(const std::array<u64, 4>& words) noexcept
             -> std::optional<Xoshiro256PlusPlus>
         {
-            const auto zeroed = [](u64 word) noexcept {
-                return word == u64{0};
-            };
-    
-            if (std::ranges::all_of(state, zeroed)) {
-                return std::nullopt;
-            }
+            for (auto word : words)
+                if (word != 0)
+                    return Xoshiro256PlusPlus{words};
 
-            return Xoshiro256PlusPlus{state};
+            return std::nullopt;
         }
 
         [[nodiscard]]
-        static auto seed_from_raw_bytes(std::span<const std::byte> bytes) noexcept
+        static auto seed_from_raw_bytes(std::span<const u8> bytes) noexcept
             -> std::optional<Xoshiro256PlusPlus>
         {
             if (bytes.size() != 32)
                 return std::nullopt;
 
-            const auto zeroed = [](std::byte byte) noexcept {
-                return byte == std::byte{0u};
-            };
+            bool nonzero{false};
+            std::array<u64, 4> words{};
 
-            if (std::ranges::all_of(bytes, zeroed)) {
-                return seed_from_u64(0u);
+            for (auto offset = 0; offset < bytes.size(); ++offset) {
+                nonzero |= bytes[offset] != 0;
+
+                const auto word = offset / sizeof(u64); 
+                const auto byte = offset % sizeof(u64); 
+
+                words[word] |= 
+                        static_cast<u64>(bytes[offset]) << (8u * byte);
             }
+            
+            if (nonzero)
+                return Xoshiro256PlusPlus{words};
 
-            std::array<u64, 4> state{}; 
-            for (auto word = 0; word < state.size(); ++word) {
-                for (auto byte = 0; byte < sizeof(u64); ++byte) {
-                    const auto offset = word * sizeof(u64) + byte;
-                    
-                    state[word] |= 
-                        static_cast<u64>(
-                            std::to_integer<u8>(bytes[offset])
-                        ) << (8u * byte);
-                }
-            }
-
-            return seed_from_state(state);
+            return seed_from_u64(0);
         }
 
         [[nodiscard]]
