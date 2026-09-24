@@ -14,27 +14,15 @@
 
 namespace rng::rngs {
     // `xoshiro256++` pseudorandom generator.
-    //
-    // `xoshiro256++` is a non-cryptographic generator with 256 bits
-    // of internal state and native 64-bit output. Its statistical
-    // quality and speed, make it a good choice in numerical workloads.
-    //
-    // See http://prng.di/unimi.it/xoshiro256plusplus.c.
     class Xoshiro256PlusPlus final {
         
         std::array<u64, 4> state;
 
     private:
-        // Private unchecked constructor.
         explicit Xoshiro256PlusPlus(const std::array<u64, 4>& state_) noexcept 
                 : state(state_) {}
 
     public:
-        // Constructs a generator from an exact state.
-        //
-        // `xoshiro256++` **must** never enter the all-zero state. If
-        // all four state words are zero-valued, then `std::nullopt` is
-        // returned.
         [[nodiscard]]
         static auto seed_from_state(const std::array<u64, 4>& state) noexcept
             -> std::optional<Xoshiro256PlusPlus>
