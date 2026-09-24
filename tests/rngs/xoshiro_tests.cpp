@@ -64,9 +64,6 @@ namespace {
 
         EXPECT_EQ(gen32.next_u32(), expected);
         EXPECT_EQ(gen32.next_u64(), gen64.next_u64());
-        //        ^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^
-        //        |
-        //        - Confirm we have advanced state once.
     }
 }
 
