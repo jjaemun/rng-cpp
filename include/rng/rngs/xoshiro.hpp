@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <limits>
 #include <optional>
 #include <ranges>
 #include <span>
@@ -29,7 +30,7 @@ namespace rng::rngs {
         {
             const auto zeroed = [](u64 word) noexcept {
                 return word == u64{0};
-            }
+            };
     
             if (std::ranges::all_of(state, zeroed)) {
                 return std::nullopt;
@@ -49,9 +50,9 @@ namespace rng::rngs {
                 return byte == std::byte{0u};
             };
 
-            if (std::ranges::all_of(bytes, zeroed))
+            if (std::ranges::all_of(bytes, zeroed)) {
                 return seed_from_u64(0u);
-            
+            }
 
             std::array<u64, 4> state{}; 
             for (auto word = 0; word < state.size(); ++word) {
@@ -127,7 +128,7 @@ namespace rng::rngs {
             while (dst.size() >= sizeof(u64)) {
                 const u64 word = next_u64();
 
-                for (auto i = 0; i < sizeof(u64); ++i)) {
+                for (auto i = 0; i < sizeof(u64); ++i) {
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
                 }
 
