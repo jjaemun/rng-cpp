@@ -13,15 +13,28 @@
 
 
 namespace rng::rngs {
+    // `xoshiro256++` pseudorandom generator.
+    //
+    // `xoshiro256++` is a non-cryptographic generator with 256 bits
+    // of internal state and native 64-bit output. Its statistical
+    // quality and speed, make it a good choice in numerical workloads.
+    //
+    // See http://prng.di/unimi.it/xoshiro256plusplus.c.
     class Xoshiro256PlusPlus final {
         
         std::array<u64, 4> state;
 
     private:
+        // Private unchecked constructor.
         explicit Xoshiro256PlusPlus(const std::array<u64, 4>& state_) noexcept 
                 : state(state_) {}
 
     public:
+        // Constructs a generator from an exact state.
+        //
+        // `xoshiro256++` **must** never enter the all-zero state. If
+        // all four state words are zero-valued, then `std::nullopt` is
+        // returned.
         [[nodiscard]]
         static auto seed_from_state(const std::array<u64, 4>& state) noexcept
             -> std::optional<Xoshiro256PlusPlus>
@@ -30,8 +43,9 @@ namespace rng::rngs {
                 return word == u64{0};
             }
     
-            if (std::ranges::all_of(state, zeroed))
+            if (std::ranges::all_of(state, zeroed)) {
                 return std::nullopt;
+            }
 
             return Xoshiro256PlusPlus{state};
         }
@@ -52,8 +66,8 @@ namespace rng::rngs {
             
 
             std::array<u64, 4> state{}; 
-            for (auto word : std::views::iota(0u, state.size())) {
-                for (auto byte : std::views::iota(0u, sizeof(u64))) {
+            for (auto word = 0; word < state.size(); ++word) {
+                for (auto byte = 0; byte < sizeof(u64); ++byte) {
                     const auto offset = word * sizeof(u64) + byte;
                     
                     state[word] |= 
@@ -125,8 +139,9 @@ namespace rng::rngs {
             while (dst.size() >= sizeof(u64)) {
                 const u64 word = next_u64();
 
-                for (auto i : std::views::iota(0u, sizeof(u64)))
+                for (auto i = 0; i < sizeof(u64); ++i)) {
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
+                }
 
                 dst = dst.subspan(sizeof(u64));
             }
@@ -134,9 +149,9 @@ namespace rng::rngs {
             if (!dst.empty()) {
                 const u64 word = next_u64();
 
-                for (auto i : std::views::iota(0u, dst.size())
+                for (auto i = 0; i < dst.size(); ++i) {
                     dst[i] = static_cast<std::byte>(word >> (8 * i));
-                
+                } 
             }
         }
    };
