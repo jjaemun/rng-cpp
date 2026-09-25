@@ -20,51 +20,43 @@ namespace rng::dist {
         requires (num::FpType<T> 
                         && num::UnsignedIntType<U>)
     [[nodiscard]]
-    constexpr T canonical(U bits) noexcept {
+    constexpr T canon_from_unsigned_bits(U bits) noexcept {
         using namespace num;
 
-        constexpr auto fpdig = DIGITS<T>;
-        constexpr auto indig = DIGITS<U>;
+        static_assert(DIGITS<T> <= DIGITS<U>);
 
-        static_assert(fpdig <= indig);
+        constexpr auto excess = DIGITS<U> - DIGITS<T>;
+        constexpr auto factor = EPSILON<T> / T{2};
 
-        // auxiliaries.
-        constexpr auto excess = indig - fpdig;
-        constexpr auto scale = EPSILON<T> / T{2};
-
-        return static_cast<T>(bits >> excess) * scale;
+        return static_cast<T>(bits >> excess) * factor;
     }
 
+    
+    namespace sealed {
+        template <typename T>
+        concept Sealed = (std::same_as<T, f32> 
+                                || std::same_as<T, f64>);
+    } // namespace sealed
 
-    template <typename T>
-    concept UniformType =
-        std::same_as<T, f32> ||
-        std::same_as<T, f64>;
-
-
-    template <UniformType T>
+    template <typename S>
+        requires (sealed::Sealed<S>)
     class Uniform final {
 
-        T lower;
-        T upper;
+        S a;
+        S b;
 
     private:
-        explicit Uniform(T lower_, T upper_) noexcept
-            : lower(lower_),
-              upper(upper_) {}
+        explicit Uniform(S a_, S b_) noexcept
+            : a(a_), b(b_) {}
 
     public:
         [[nodiscard]]
-        static auto from_bounds(T lower, T upper) noexcept
-            -> std::optional<Uniform>
-        {
-            if (!std::isfinite(lower) || !std::isfinite(upper)) {
+        static std::optional<Uniform> from_bounds(S lower, S upper) noexcept {
+            if (!std::isfinite(lower) || !std::isfinite(upper))
                 return std::nullopt;
-            }
-
-            if (lower >= upper) {
+            
+            if (lower >= upper)
                 return std::nullopt;
-            }
 
             return Uniform{lower, upper};
         }
@@ -72,30 +64,27 @@ namespace rng::dist {
         template <typename R>
             requires (Rng<R>)
         [[nodiscard]]
-        T sample(R& gen) const noexcept {
-            T unit;
+        S sample(R& gen) const noexcept {
+            S s;
 
-            if constexpr (std::same_as<T, f32>) {
-                unit = canonical<T>(gen.next_u32());
-            } else {
-                unit = canonical<T>(gen.next_u64());
-            }
+            if constexpr (std::same_as<S, f32>)
+                s = canon_from_unsigned_bits<S>(gen.next_u32());
+            else 
+                s = canon_from_unsigned_bits<S>(gen.next_u64());
+            
+            const S sample = std::lerp(a, b, unit);
 
-            const T sampled =
-                std::lerp(lower, upper, unit);
-
-            if (sampled < upper) {
-                return sampled;
-            }
-
-            return std::nextafter(upper, lower);
+            if (sample < b)
+                return sample;
+            
+            return std::nextafter(a, b);
         }
 
         template <typename R>
             requires (Rng<R>)
-        void fill(R& gen, std::span<T> dst) const noexcept {
-            for (auto& value : dst) {
-                value = sample(gen);
+        void fill(R& gen, std::span<S> dst) const noexcept {
+            for (auto& e : dst) {
+                e = sample(gen);
             }
         }
     };
