@@ -5,7 +5,7 @@
 #include "rng/num/concepts.hpp"
 
 
-namespace rng::traits {
+namespace rng {
     template <typename T>
         requires (IntType<T> || FpType<T>)
     static constexpr auto MAX{std::numeric_limits<T>::max()};
