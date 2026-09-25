@@ -19,14 +19,19 @@ namespace rng::dist {
         requires (Float<T> && !Signed<U>)
     concept SufficientBitSource = (DIGITS<T> <= DIGITS<U>);
 
+
+    // `SufficientBitSource` guarantees that the random unsigned bit source
+        // can supply enough bits to construct a canonical uniformly distributed target.
     template <typename T, typename U>
         requires (SufficientBitSource<T, U>)
     [[nodiscard]]
     constexpr T canon_from_unsigned_bits(U bits) noexcept {
-        constexpr auto excess = DIGITS<U> - DIGITS<T>;
-        constexpr auto factor = EPSILON<T> / T{2};
+        const auto fdgs = DIGITS<T>;
+        const auto udgs = DIGITS<U>;
 
-        return static_cast<T>(bits >> excess) * factor;
+        const auto factor = EPSILON<T> / T{2};
+
+        return static_cast<T>(bits >> (udgs - fdgs) * factor;
     }
 
     template <typename S>
@@ -37,10 +42,15 @@ namespace rng::dist {
         S b;
 
     private:
-        explicit Uniform(S a_, S b_) noexcept
+        explicit constexpr Uniform(S a_, S b_) noexcept
             : a(a_), b(b_) {}
 
     public:
+        [[nodiscard]]
+        static constexpr Uniform from_bounds_unchecked(S lower, S upper) noexcept {
+            return Uniform{lower, upper};
+        }
+
         [[nodiscard]]
         static std::optional<Uniform> from_bounds(S lower, S upper) noexcept {
             if (!std::isfinite(lower) || !std::isfinite(upper))
