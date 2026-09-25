@@ -8,34 +8,31 @@
 #include <span>
 
 
-#include "rng/concepts.hpp"
+#include "rng/num/concepts.hpp"
+#include "rng/num/traits.hpp"
 #include "rng/rng.hpp"
 #include "rng/types.hpp"
 
 
 namespace rng::dist {
     // Converts uniformly distributed bits into a floating-point value in [0, 1).
-    template <FpType F, UnsignedIntType U>
+    template <typename T, typename U>
+        requires (num::FpType<T> 
+                        && num::UnsignedIntType<U>)
     [[nodiscard]]
-    constexpr F canonical(U bits) noexcept {
-        constexpr auto floating_digits =
-            std::numeric_limits<F>::digits;
+    constexpr T canonical(U bits) noexcept {
+        using namespace num;
 
-        constexpr auto integer_digits =
-            std::numeric_limits<U>::digits;
+        constexpr auto fpdig = DIGITS<T>;
+        constexpr auto indig = DIGITS<U>;
 
-        static_assert(
-            floating_digits <= integer_digits,
-            "The integer type does not provide enough random bits."
-        );
+        static_assert(fpdig <= indig);
 
-        constexpr auto excess =
-            integer_digits - floating_digits;
+        // auxiliaries.
+        constexpr auto excess = indig - fpdig;
+        constexpr auto scale = EPSILON<T> / T{2};
 
-        constexpr F scale =
-            EPSILON<F> / F{2};
-
-        return static_cast<F>(bits >> excess) * scale;
+        return static_cast<T>(bits >> excess) * scale;
     }
 
 
