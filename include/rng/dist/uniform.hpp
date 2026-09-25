@@ -70,16 +70,18 @@ namespace rng::dist {
         [[nodiscard]]
         S sample(R& gen) const noexcept {
             S seal;
-            if constexpr (std::same_as<S, f32>)
+            if constexpr (std::same_as<S, f32>) {
                 seal = canon_from_unsigned_bits<S>(gen.next_u32());
-            else 
+            } else {
                 seal = canon_from_unsigned_bits<S>(gen.next_u64());
+            }
             
             const S sampled = std::lerp(a, b, seal);
 
-            if (sampled < b)
+            if (sampled < b) {
                 return sampled;
-            
+            }
+
             return std::nextafter(b, a);
         }
 
