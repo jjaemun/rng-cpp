@@ -15,25 +15,6 @@
 
 
 namespace rng::dist {
-    template <typename T, typename U>
-        requires (Float<T> && !Signed<U>)
-    concept SufficientBitSource = (DIGITS<T> <= DIGITS<U>);
-
-
-    // `SufficientBitSource` guarantees that the random unsigned bit source
-        // can supply enough bits to construct a canonical uniformly distributed target.
-    template <typename T, typename U>
-        requires (SufficientBitSource<T, U>)
-    [[nodiscard]]
-    constexpr T canon_from_unsigned_bits(U bits) noexcept {
-        const auto fdgs = DIGITS<T>;
-        const auto udgs = DIGITS<U>;
-
-        const auto factor = EPSILON<T> / T{2};
-
-        return static_cast<T>(bits >> (udgs - fdgs)) * factor;
-    }
-
     template <typename S>
         requires (sealed::Sealed<S>)
     class Uniform final {
@@ -71,9 +52,9 @@ namespace rng::dist {
         S sample(R& gen) const noexcept {
             S seal;
             if constexpr (std::same_as<S, f32>) {
-                seal = canon_from_unsigned_bits<S>(gen.next_u32());
+                seal = canon_half_open_from_unsigned_bits<S>(gen.next_u32());
             } else {
-                seal = canon_from_unsigned_bits<S>(gen.next_u64());
+                seal = canon_half_open_from_unsigned_bits<S>(gen.next_u64());
             }
             
             const S sampled = std::lerp(a, b, seal);
