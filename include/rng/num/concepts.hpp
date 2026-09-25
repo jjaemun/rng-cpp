@@ -5,7 +5,7 @@
 #include <type_traits>
 
 
-namespace rng {
+namespace rng::num {
     // Satisfied by integral scalar types.
     // 
     // `IntType<T>` holds iff `T` models `std::integral<T>`.
@@ -71,4 +71,4 @@ namespace rng {
     // ```
     template <typename T>
     concept FpType = std::floating_point<T>;
-} // namespace rng
+} // namespace rng::num

@@ -5,7 +5,7 @@ pragma once
 #include "rng/num/concepts.hpp"
 
 
-namespace rng {
+namespace rng::num {
     template <typename T>
         requires
             (FpType<T>)
@@ -70,4 +70,4 @@ namespace rng {
         requires
             (FpType<T>)
     constexpr T PHI = std::numbers::phi_v<T>;
-} // namespace rng
+} // namespace rng::num

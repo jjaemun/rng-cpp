@@ -5,7 +5,7 @@
 #include "rng/num/concepts.hpp"
 
 
-namespace rng {
+namespace rng::num {
     template <typename T>
         requires (IntType<T> || FpType<T>)
     inline constexpr auto MAX{std::numeric_limits<T>::max()};
@@ -49,4 +49,4 @@ namespace rng {
     template <typename T>
         requires (FpType<T>)
     inline constexpr auto EPSILON{std::numeric_limits<T>::epsilon()};
-} //namespace rng
+} //namespace rng::num
