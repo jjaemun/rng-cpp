@@ -8,49 +8,45 @@
 namespace rng {
     template <typename T>
         requires (IntType<T> || FpType<T>)
-    static constexpr auto MAX{std::numeric_limits<T>::max()};
+    inline constexpr auto MAX{std::numeric_limits<T>::max()};
 
     template <typename T>
         requires (FpType<T>)
-    static constexpr auto MIN_POSITIVE{std::numeric_limits<T>::min()}; 
+    inline constexpr auto MIN_POSITIVE{std::numeric_limits<T>::min()}; 
 
     template <typename T>
         requires (IntType<T> || FpType<T>)
-    static constexpr auto MIN{std::numeric_limits<T>::lowest()};
+    inline constexpr auto MIN{std::numeric_limits<T>::lowest()};
 
     template <typename T>
         requires (IntType<T> || FpType<T>)
-    static constexpr auto BYTES{sizeof(T)};
+    inline constexpr auto BYTES{sizeof(T)};
 
     template <typename T>
         requires (IntType<T> || FpType<T>)
-    static constexpr auto BITS{sizeof(T) * 8uz};
+    inline constexpr auto BITS{sizeof(T) * 8u};
 
     template <typename T>
         requires (FpType<T>)
-    static constexpr auto INF{std::numeric_limits<T>::infinity()};
+    inline constexpr auto INF{std::numeric_limits<T>::infinity()};
 
     template <typename T>
         requires (FpType<T>)
-    static constexpr auto NEG_INF{-std::numeric_limits<T>::infinity()};
+    inline constexpr auto NEG_INF{-std::numeric_limits<T>::infinity()};
 
     template <typename T>
         requires (FpType<T>)
-    static constexpr auto RADIX{std::numeric_limits<T>::radix};
+    inline constexpr auto RADIX{std::numeric_limits<T>::radix};
 
     template <typename T>
         requires (FpType<T> || IntType<T>)
-    static constexpr auto DIGITS{std::numeric_limits<T>::digits10};
+    inline constexpr auto DIGITS{std::numeric_limits<T>::digits};
 
     template <typename T>
         requires (FpType<T>)
-    static constexpr auto MAX_DIGITS{std::numeric_limits<T>::max_digits10};
-
-    template <typename T>
-        requires (FpType<T>)
-    static constexpr auto QUIET_NAN{std::numeric_limits<T>::quiet_NaN()};
+    inline constexpr auto QUIET_NAN{std::numeric_limits<T>::quiet_NaN()};
         
     template <typename T>
         requires (FpType<T>)
-    static constexpr auto EPSILON{std::numeric_limits<T>::epsilon()};
+    inline constexpr auto EPSILON{std::numeric_limits<T>::epsilon()};
 } //namespace rng
