@@ -31,7 +31,7 @@ namespace rng::dist {
 
         const auto factor = EPSILON<T> / T{2};
 
-        return static_cast<T>(bits >> (udgs - fdgs) * factor;
+        return static_cast<T>(bits >> (udgs - fdgs)) * factor;
     }
 
     template <typename S>
@@ -52,8 +52,11 @@ namespace rng::dist {
         }
 
         [[nodiscard]]
-        static std::optional<Uniform> from_bounds(S lower, S upper) noexcept {
-            if (!std::isfinite(lower) || !std::isfinite(upper))
+        static auto from_bounds(S lower, S upper) noexcept 
+            -> std::optional<Uniform> 
+        {
+            if (!std::isfinite(lower) 
+                    || !std::isfinite(upper))
                 return std::nullopt;
             
             if (lower >= upper)
@@ -66,16 +69,16 @@ namespace rng::dist {
             requires (Rng<R>)
         [[nodiscard]]
         S sample(R& gen) const noexcept {
-            S s;
+            S seal;
             if constexpr (std::same_as<S, f32>)
-                s = canon_from_unsigned_bits<S>(gen.next_u32());
+                seal = canon_from_unsigned_bits<S>(gen.next_u32());
             else 
-                s = canon_from_unsigned_bits<S>(gen.next_u64());
+                seal = canon_from_unsigned_bits<S>(gen.next_u64());
             
-            const S sample = std::lerp(a, b, unit);
+            const S sampled = std::lerp(a, b, seal);
 
-            if (sample < b)
-                return sample;
+            if (sampled < b)
+                return sampled;
             
             return std::nextafter(b, a);
         }
@@ -83,8 +86,8 @@ namespace rng::dist {
         template <typename R>
             requires (Rng<R>)
         void fill(R& gen, std::span<S> dst) const noexcept {
-            for (auto& e : dst) {
-                e = sample(gen);
+            for (auto& item : dst) {
+                item = sample(gen);
             }
         }
     };
