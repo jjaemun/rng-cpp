@@ -11,32 +11,23 @@
 #include "rng/num/concepts.hpp"
 #include "rng/num/traits.hpp"
 #include "rng/rng.hpp"
-#include "rng/types.hpp"
+#include "rng/sealed.hpp"
 
 
 namespace rng::dist {
-    // Converts uniformly distributed bits into a floating-point value in [0, 1).
     template <typename T, typename U>
-        requires (num::FpType<T> 
-                        && num::UnsignedIntType<U>)
+        requires (Float<T> && !Signed<U>)
+    concept SufficientBitSource = (DIGITS<T> <= DIGITS<U>);
+
+    template <typename T, typename U>
+        requires (SufficientBitSource<T, U>)
     [[nodiscard]]
     constexpr T canon_from_unsigned_bits(U bits) noexcept {
-        using namespace num;
-
-        static_assert(DIGITS<T> <= DIGITS<U>);
-
         constexpr auto excess = DIGITS<U> - DIGITS<T>;
         constexpr auto factor = EPSILON<T> / T{2};
 
         return static_cast<T>(bits >> excess) * factor;
     }
-
-    
-    namespace sealed {
-        template <typename T>
-        concept Sealed = (std::same_as<T, f32> 
-                                || std::same_as<T, f64>);
-    } // namespace sealed
 
     template <typename S>
         requires (sealed::Sealed<S>)
@@ -66,7 +57,6 @@ namespace rng::dist {
         [[nodiscard]]
         S sample(R& gen) const noexcept {
             S s;
-
             if constexpr (std::same_as<S, f32>)
                 s = canon_from_unsigned_bits<S>(gen.next_u32());
             else 
@@ -77,7 +67,7 @@ namespace rng::dist {
             if (sample < b)
                 return sample;
             
-            return std::nextafter(a, b);
+            return std::nextafter(b, a);
         }
 
         template <typename R>

@@ -93,6 +93,11 @@ namespace rng::rngs {
             return next_u64();
         }
  
+        void discard(u64 n) noexcept {
+            for (; n > 0; --n)
+                (void)(next_u64());
+        }
+
         [[nodiscard]]
         u32 next_u32() noexcept {
             return static_cast<u32>(next_u64() >> 32);
@@ -101,16 +106,16 @@ namespace rng::rngs {
         [[nodiscard]]
         u64 next_u64() noexcept {
             const u64 result =
-            std::rotl(state[0] + state[3], 23) + state[0];
+                std::rotl(state[0] + state[3], 23) + state[0];
 
-            const u64 temporary = state[1] << 17;
+            const u64 t = state[1] << 17;
 
             state[2] ^= state[0];
             state[3] ^= state[1];
             state[1] ^= state[2];
             state[0] ^= state[3];
 
-            state[2] ^= temporary;
+            state[2] ^= t;
             state[3] = std::rotl(state[3], 45);
 
             return result;
