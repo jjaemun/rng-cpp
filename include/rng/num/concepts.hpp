@@ -8,7 +8,7 @@
 namespace rng {
     // Satisfied by integral scalar types.
     // 
-    // `IntType<T>` holds iff `T` models `std::integral<T>`.
+    // `Int<T>` holds iff `T` models `std::integral<T>`.
     //
     // # Examples
     //
@@ -24,7 +24,7 @@ namespace rng {
 
     // Satisfied by signed integral types.
     // 
-    // `SignedIntType<T>` holds iff `T` models both `std::integral<T>`
+    // `Signed<T>` holds iff `T` models both `std::integral<T>`
     // and `std::signed_integral<T>`.
     //
     // # Examples
@@ -42,7 +42,7 @@ namespace rng {
         
     // Satisfied by floating point scalar types.
     // 
-    // `FpType<T>` holds iff `T` models `std::floating_point<T>`
+    // `Float<T>` holds iff `T` models `std::floating_point<T>`
     //
     // # Examples
     //
