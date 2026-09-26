@@ -18,13 +18,12 @@
 namespace rng::dist {
     // `SufficientBitSource` guarantees that the random unsigned bit source
     // can supply enough bits to construct a canonical uniformly distributed target.
-    template <typename T, typename U>
-        requires (Float<T> && !Signed<U>)
-    concept SufficientBitSource = (DIGITS<T> <= DIGITS<U>);
+    template <typename U, typename F>
+    concept SufficientBitSource = !Signed<U> && Float<F> 
+                                        && (DIGITS<U> >= DIGITS<F>);
 
-
     template <typename T, typename U>
-        requires (SufficientBitSource<T, U>)
+        requires (SufficientBitSource<U, T>)
     [[nodiscard]]
     constexpr T canon_half_open_from_unsigned_bits(U bits) noexcept {
         const auto fdgs = DIGITS<T>;

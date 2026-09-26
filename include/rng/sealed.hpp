@@ -10,6 +10,6 @@
 
 namespace rng::sealed {
     template <typename T>
-    concept Sealed = (std::same_as<T, f32> || std::same_as<T, f32>)
+    concept Sealed = (std::same_as<T, f32> || std::same_as<T, f64>)
                         && (RADIX<T> == 2u);
 } // namespace rng::sealed

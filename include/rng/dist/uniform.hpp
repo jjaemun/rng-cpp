@@ -8,6 +8,7 @@
 #include <span>
 
 
+#include "rng/dist/canon.hpp"
 #include "rng/num/concepts.hpp"
 #include "rng/num/traits.hpp"
 #include "rng/rng.hpp"
@@ -59,9 +60,8 @@ namespace rng::dist {
             
             const S sampled = std::lerp(a, b, seal);
 
-            if (sampled < b) {
+            if (sampled < b)
                 return sampled;
-            }
 
             return std::nextafter(b, a);
         }
