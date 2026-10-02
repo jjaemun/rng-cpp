@@ -16,6 +16,7 @@ include(GoogleTest)
 set(
     directories
     rngs
+    dist
 )
 
 foreach(directory ${directories})

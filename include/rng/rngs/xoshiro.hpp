@@ -70,7 +70,7 @@ namespace rng::rngs {
                 auto copy = seed;
                 copy = (copy ^ (copy >> 30)) * 0xbf58476d1ce4e5b9ULL;
                 copy = (copy ^ (copy >> 27)) * 0x94d049bb133111ebULL;
-                word = copy ^ (copy >> 31);
+                word = (copy ^ (copy >> 31));
             }
         
             return Xoshiro256PlusPlus{words};
